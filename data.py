@@ -12,7 +12,7 @@ from PIL import ImageFile
 ImageFile.LOAD_TRUNCATED_IMAGES = True
 
 from utils.parser_utils import get_args
-
+DATASET_DIR = '/content/'
 
 class rotate_image(object):
 
@@ -100,7 +100,7 @@ def get_transforms_for_dataset(dataset_name, args, k):
         transform_evaluate = [transforms.ToTensor()]
 
 
-    elif 'imagenet' in dataset_name:
+    else:
 
         transform_train = [transforms.Compose([
 
@@ -246,7 +246,7 @@ class FewShotLearningDatasetParallel(Dataset):
                  string-names of the class
                  label_to_index: dictionary containing human understandable string mapped to numerical indexes
         """
-        dataset_dir = os.environ['DATASET_DIR']
+        dataset_dir = DATASET_DIR
         data_path_file = "{}/{}.json".format(dataset_dir, self.dataset_name)
         self.index_to_label_name_dict_file = "{}/map_to_label_name_{}.json".format(dataset_dir, self.dataset_name)
         self.label_name_to_map_dict_file = "{}/label_name_to_map_{}.json".format(dataset_dir, self.dataset_name)
@@ -263,6 +263,8 @@ class FewShotLearningDatasetParallel(Dataset):
             data_image_paths = self.load_from_json(filename=data_path_file)
             label_to_index = self.load_from_json(filename=self.label_name_to_map_dict_file)
             index_to_label_name_dict_file = self.load_from_json(filename=self.index_to_label_name_dict_file)
+            data_image_paths, code_to_label_name, label_name_to_code = self.get_data_paths()
+            self.save_to_json(dict_to_store=data_image_paths, filename=data_path_file)
             return data_image_paths, index_to_label_name_dict_file, label_to_index
         except:
             print("Mapped data paths can't be found, remapping paths..")
@@ -489,7 +491,7 @@ class FewShotLearningDatasetParallel(Dataset):
         #seed = seed % self.args.total_unique_tasks
         rng = np.random.RandomState(seed)
         selected_classes = rng.choice(list(self.dataset_size_dict[dataset_name].keys()),
-                                      size=self.num_classes_per_set, replace=False)
+                                      size=self.num_classes_per_set, replace=True)
         rng.shuffle(selected_classes)
         k_list = rng.randint(0, 4, size=self.num_classes_per_set)
         k_dict = {selected_class: k_item for (selected_class, k_item) in zip(selected_classes, k_list)}

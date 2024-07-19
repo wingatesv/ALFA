@@ -1,6 +1,6 @@
 from torch import cuda
 
-
+DATASET_DIR = '/content/'
 def get_args():
     import argparse
     import os
@@ -65,7 +65,7 @@ def get_args():
 
     args = parser.parse_args()
     args_dict = vars(args)
-    if args.name_of_args_json_file is not "None":
+    if args.name_of_args_json_file != "None":
         args_dict = extract_args_from_json(args.name_of_args_json_file, args_dict)
 
     for key in list(args_dict.keys()):
@@ -75,8 +75,8 @@ def get_args():
         elif str(args_dict[key]).lower() == "false":
             args_dict[key] = False
         if key == "dataset_path":
-            args_dict[key] = os.path.join(os.environ['DATASET_DIR'], args_dict[key])
-            print(key, os.path.join(os.environ['DATASET_DIR'], args_dict[key]))
+            args_dict[key] = os.path.join(DATASET_DIR, args_dict[key])
+            print(key, os.path.join(DATASET_DIR, args_dict[key]))
 
         print(key, args_dict[key], type(args_dict[key]))
 
