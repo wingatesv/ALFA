@@ -171,6 +171,9 @@ class FewShotLearningDatasetParallel(Dataset):
         print("data", self.data_length)
         self.observed_seed_set = None
 
+        self.save_to_json(dict_to_store=self.datasets, filename='dataset_split')
+
+
     def load_dataset(self):
         """
         Loads a dataset's dictionary files and splits the data according to the train_val_test_split variable stored
