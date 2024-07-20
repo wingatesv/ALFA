@@ -196,7 +196,8 @@ class FewShotLearningDatasetParallel(Dataset):
                     dataset_splits[set_name][class_label] = value
 
         elif self.args.custom_dataset_split == True:
-
+            print('Using custom json: /content/Combine/Combine.json')
+            data_image_paths, index_to_label_name_dict_file, label_to_index = self.load_datapaths()
             dataset_splits = self.load_from_json('/content/Combine/Combine.json')
         else:
             data_image_paths, index_to_label_name_dict_file, label_to_index = self.load_datapaths()

@@ -288,10 +288,10 @@ class ExperimentBuilder(object):
                                                                                pbar_test=pbar_test)
         
          # Ensure homogeneous shapes for per_model_per_batch_preds
-        for idx, preds in enumerate(per_model_per_batch_preds):
-            print(f"Shape of predictions for model {idx}: {[p.shape for p in preds]}")
-            # Flatten predictions if they are nested lists of arrays
-            per_model_per_batch_preds[idx] = np.vstack(preds)
+        # for idx, preds in enumerate(per_model_per_batch_preds):
+        #     print(f"Shape of predictions for model {idx}: {[p.shape for p in preds]}")
+        #     # Flatten predictions if they are nested lists of arrays
+        #     per_model_per_batch_preds[idx] = np.vstack(preds)
 
         # Check if all predictions have the same shape
         pred_shapes = [p.shape for p in per_model_per_batch_preds]
