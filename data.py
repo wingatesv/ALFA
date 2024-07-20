@@ -171,7 +171,6 @@ class FewShotLearningDatasetParallel(Dataset):
         print("data", self.data_length)
         self.observed_seed_set = None
 
-        self.save_to_json(dict_to_store=self.datasets, filename='dataset_split')
 
 
     def load_dataset(self):
@@ -195,6 +194,10 @@ class FewShotLearningDatasetParallel(Dataset):
                     dataset_splits[set_name] = {class_label: value}
                 else:
                     dataset_splits[set_name][class_label] = value
+
+        elif self.args.custom_dataset_split == True:
+
+            dataset_splits = self.load_from_json('/content/Combine/Combine.json')
         else:
             data_image_paths, index_to_label_name_dict_file, label_to_index = self.load_datapaths()
             total_label_types = len(data_image_paths)
@@ -217,6 +220,12 @@ class FewShotLearningDatasetParallel(Dataset):
                                      {class_key: data_image_paths[class_key] for class_key in x_val_classes}, \
                                      {class_key: data_image_paths[class_key] for class_key in x_test_classes},
             dataset_splits = {"train": x_train, "val":x_val , "test": x_test}
+
+            # x_train = dataset_splits_json.get("train", {})
+            # x_val = dataset_splits_json.get("val", {})
+            # x_test = dataset_splits_json.get("test", {})
+            
+            # dataset_splits = {"train": x_train, "val": x_val, "test": x_test}
 
         if self.args.load_into_memory is True:
 

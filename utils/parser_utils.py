@@ -19,6 +19,7 @@ def get_args():
     parser.add_argument('--train_val_test_split', nargs='+', default=[0.73982737361, 0.26, 0.13008631319])
     parser.add_argument('--samples_per_iter', nargs="?", type=int, default=1)
     parser.add_argument('--labels_as_int', type=str, default="False")
+    parser.add_argument('--custom_dataset_split', type=str, default="False")
     parser.add_argument('--seed', type=int, default=104)
 
     parser.add_argument('--gpu_to_use', type=int)
