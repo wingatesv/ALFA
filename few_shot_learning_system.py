@@ -6,7 +6,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
 
-from meta_neural_network_architectures import VGGReLUNormNetwork, ResNet12
+from meta_neural_network_architectures import VGGReLUNormNetwork, ResNet12, ResNet34
 from inner_loop_optimizers import LSLRGradientDescentLearningRule
 
 
@@ -43,6 +43,10 @@ class MAMLFewShotClassifier(nn.Module):
 
         if self.args.backbone == 'ResNet12':
             self.classifier = ResNet12(im_shape=self.im_shape, num_output_classes=self.args.
+                                                 num_classes_per_set,
+                                                 args=args, device=device, meta_classifier=True).to(device=self.device)
+        elif self.args.backbone == 'ResNet34':
+            self.classifier = ResNet34(im_shape=self.im_shape, num_output_classes=self.args.
                                                  num_classes_per_set,
                                                  args=args, device=device, meta_classifier=True).to(device=self.device)
         else:
