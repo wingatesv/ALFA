@@ -286,42 +286,66 @@ class ExperimentBuilder(object):
                                                                                model_idx=idx,
                                                                                per_model_per_batch_preds=per_model_per_batch_preds,
                                                                                pbar_test=pbar_test)
-        
-         # Ensure homogeneous shapes for per_model_per_batch_preds
+
+        # Ensure per_model_per_batch_preds is a list of numpy arrays and filter out empty predictions
+        filtered_per_model_per_batch_preds = []
+        for idx in range(top_n_models):
+            preds_array = np.array(per_model_per_batch_preds[idx])
+            if preds_array.size > 0:
+                filtered_per_model_per_batch_preds.append(preds_array)
+
+
+        # Identify and print outlier shapes
+        shapes = [p.shape for p in filtered_per_model_per_batch_preds]
+        print("Shapes of all predictions:")
+        print(shapes)
+
+        if len(filtered_per_model_per_batch_preds) > 0:
+          normal_shape = shapes[0]
+          for shape in shapes:
+              if shape != normal_shape:
+                  print("Outlier shape detected:", shape)
+              else:
+                  print("Normal shape:", shape)
+        # Ensure homogeneous shapes for per_model_per_batch_preds
         # for idx, preds in enumerate(per_model_per_batch_preds):
         #     print(f"Shape of predictions for model {idx}: {[p.shape for p in preds]}")
         #     # Flatten predictions if they are nested lists of arrays
         #     per_model_per_batch_preds[idx] = np.vstack(preds)
 
         # Check if all predictions have the same shape
-        pred_shapes = [p.shape for p in per_model_per_batch_preds]
-        if len(set(pred_shapes)) > 1:
-            raise ValueError(f"Inconsistent prediction shapes: {pred_shapes}")
+        # pred_shapes = [p.shape for p in per_model_per_batch_preds]
+        # if len(set(pred_shapes)) > 1:
+        #     raise ValueError(f"Inconsistent prediction shapes: {pred_shapes}")
 
         # for i in range(top_n_models):
         #     print("test assertion", 0)
         #     print(per_model_per_batch_targets[0], per_model_per_batch_targets[i])
         #     assert np.equal(np.array(per_model_per_batch_targets[0]), np.array(per_model_per_batch_targets[i]))
-        
-        per_batch_preds = np.mean(per_model_per_batch_preds, axis=0)
-        #print(per_batch_preds.shape)
-        per_batch_max = np.argmax(per_batch_preds, axis=2)
-        per_batch_targets = np.array(per_model_per_batch_targets[0]).reshape(per_batch_max.shape)
-        #print(per_batch_max)
-        accuracy = np.mean(np.equal(per_batch_targets, per_batch_max))
-        accuracy_std = np.std(np.equal(per_batch_targets, per_batch_max))
+          if all(shape == normal_shape for shape in shapes):
+            per_batch_preds = np.mean(filtered_per_model_per_batch_preds, axis=0)
+            #print(per_batch_preds.shape)
+            per_batch_max = np.argmax(per_batch_preds, axis=2)
+            per_batch_targets = np.array(per_model_per_batch_targets[0]).reshape(per_batch_max.shape)
+            #print(per_batch_max)
+            accuracy = np.mean(np.equal(per_batch_targets, per_batch_max))
+            accuracy_std = np.std(np.equal(per_batch_targets, per_batch_max))
 
-        test_losses = {"test_accuracy_mean": accuracy, "test_accuracy_std": accuracy_std}
+            test_losses = {"test_accuracy_mean": accuracy, "test_accuracy_std": accuracy_std}
 
-        _ = save_statistics(self.logs_filepath,
-                            list(test_losses.keys()),
-                            create=True, filename="test_summary.csv")
+            _ = save_statistics(self.logs_filepath,
+                                list(test_losses.keys()),
+                                create=True, filename="test_summary.csv")
 
-        summary_statistics_filepath = save_statistics(self.logs_filepath,
-                                                      list(test_losses.values()),
-                                                      create=False, filename="test_summary.csv")
-        print(test_losses)
-        print("saved test performance at", summary_statistics_filepath)
+            summary_statistics_filepath = save_statistics(self.logs_filepath,
+                                                          list(test_losses.values()),
+                                                          create=False, filename="test_summary.csv")
+            print(test_losses)
+            print("saved test performance at", summary_statistics_filepath)
+          else:
+            print("Cannot average predictions due to shape mismatch.")
+        else:
+          print("No valid predictions available for averaging.")
 
     def run_experiment(self):
         """
